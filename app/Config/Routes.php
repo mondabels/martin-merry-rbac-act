@@ -52,3 +52,16 @@ $routes->group('admin', ['filter' => 'auth:admin'], function ($routes) {
     $routes->get('users', 'Admin\UserAdminController::index');
     $routes->post('users/assign-role/(:num)', 'Admin\UserAdminController::assignRole/$1');
 });
+
+// API ROUTES
+$routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], static function ($routes) {
+    // 1. PUBLIC ROUTE (Asking the front desk for a key)
+    $routes->post('auth/token', 'AuthController::createToken');
+    // 2. PROTECTED ROUTES (Where the bouncer steps in)
+    $routes->group('', ['filter' => 'api_auth'], static function ($routes) {
+        // Fetch all students
+        $routes->get('students', 'StudentController::index');
+        // Fetch a single student by ID
+        $routes->get('students/(:num)', 'StudentController::show/$1');
+    });
+});

@@ -38,6 +38,7 @@ class Filters extends BaseFilters
         'student'       => \App\Filters\StudentFilter::class,
         'teacher'       => \App\Filters\TeacherFilter::class,
         'admin'         => \App\Filters\AdminFilter::class,
+        'api_auth'      => \App\Filters\ApiAuthFilter::class,
     ];
 
     /**
