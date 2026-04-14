@@ -33,7 +33,7 @@ class ApiAuthFilter implements FilterInterface
         $db = \Config\Database::connect();
         $apiToken = $db->table('api_tokens')->where('token', $token)->get()->getRow();
 
-        if (!$apiToken) {
+        if (!$apiToken || ($apiToken->expires_at !== null && $apiToken->expires_at < date('Y-m-d H:i:s'))) {
             return Services::response()
                 ->setJSON(['error' => 'Unauthorized. Invalid or expired token.'])
                 ->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);

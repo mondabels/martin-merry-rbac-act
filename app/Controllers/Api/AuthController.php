@@ -25,17 +25,29 @@ class AuthController extends ResourceController
         }
 
         $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 day'));
 
         $db = \Config\Database::connect();
         $db->table('api_tokens')->insert([
             'user_id' => $user['id'],
             'token' => $token,
-            'created_at' => date('Y-m-d H:i:s')
+            'created_at' => date('Y-m-d H:i:s'),
+            'expires_at' => $expiresAt
         ]);
 
         return $this->respond([
-            'message' => 'Token generated successfully. KEEP THIS SECURE!',
-            'token' => $token,
+            'status' => 'success',
+            'message' => 'Token issued successfully.',
+            'data' => [
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => $expiresAt,
+                'user' => [
+                    'id' => $user['id'],
+                    'name' => $user['name'],
+                    'email' => $user['email']
+                ]
+            ]
         ]);
     }
 }
