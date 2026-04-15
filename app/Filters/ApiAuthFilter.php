@@ -31,11 +31,31 @@ class ApiAuthFilter implements FilterInterface
         }
 
         $db = \Config\Database::connect();
-        $apiToken = $db->table('api_tokens')->where('token', $token)->get()->getRow();
+        $apiToken = $db->table('api_tokens')
+            ->select('api_tokens.*, roles.name as role_name')
+            ->join('users', 'users.id = api_tokens.user_id')
+            ->join('roles', 'roles.id = users.role_id')
+            ->where('api_tokens.token', $token)
+            ->get()
+            ->getRow();
 
         if (!$apiToken || ($apiToken->expires_at !== null && $apiToken->expires_at < date('Y-m-d H:i:s'))) {
             return Services::response()
                 ->setJSON(['error' => 'Unauthorized. Invalid or expired token.'])
+                ->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
+        }
+
+        $roleName = $apiToken->role_name;
+
+        if ($arguments && is_array($arguments)) {
+            if (!in_array($roleName, $arguments, true)) {
+                return Services::response()
+                    ->setJSON(['error' => 'Unauthorized. Insufficient permissions.'])
+                    ->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
+            }
+        } elseif ($roleName !== 'admin' && $roleName !== 'teacher') {
+            return Services::response()
+                ->setJSON(['error' => 'Unauthorized. Insufficient permissions.'])
                 ->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
         }
     }

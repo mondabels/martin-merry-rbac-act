@@ -56,7 +56,7 @@ $routes->group('admin', ['filter' => 'auth:admin'], function ($routes) {
 // API ROUTES
 $routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], static function ($routes) {
     $routes->post('auth/token', 'AuthController::createToken');
-    $routes->group('', ['filter' => 'api_auth'], static function ($routes) {
+    $routes->group('', ['filter' => 'api_auth:admin,teacher'], static function ($routes) {
         $routes->get('students', 'StudentController::index');
         $routes->get('students/(:num)', 'StudentController::show/$1');
     });

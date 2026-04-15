@@ -24,10 +24,17 @@ class AuthController extends ResourceController
             return $this->failUnauthorized('Invalid email or password');
         }
 
+        $db = \Config\Database::connect();
+        $role = $db->table('roles')->where('id', $user['role_id'])->get()->getRow();
+        $roleName = $role ? $role->name : 'student';
+
+        if (!in_array($roleName, ['admin', 'teacher'], true)) {
+            return $this->failUnauthorized('API access is restricted to admin and teacher users only');
+        }
+
         $token = bin2hex(random_bytes(32));
         $expiresAt = date('Y-m-d H:i:s', strtotime('+1 day'));
 
-        $db = \Config\Database::connect();
         $db->table('api_tokens')->insert([
             'user_id' => $user['id'],
             'token' => $token,
